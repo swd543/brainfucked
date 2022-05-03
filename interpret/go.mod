@@ -1,3 +1,3 @@
-module github.com/swd543/interpret
+module github.com/swd543/brainfucked/interpret
 
 go 1.18
