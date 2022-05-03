@@ -11,3 +11,18 @@ A stack based, streaming brainfuck interpreter written in golang ;)
 
 # Testing
 `cd interpret && go test -v -cover`
+
+# Adding as a package
+Add the interpret package => `go get github.com/swd543/brainfucked/interpret`
+
+## Initialize the interpreter state
+```go
+state := interpret.NewState[int](programReader, programOutputWriter, inputReader)
+```
+## Adding custom commands (for squaring)
+```go
+state.AddOrReplaceCommand('*', func(state *interpret.State[int]) {
+  state.Data[state.Dp] *= state.Data[state.Dp]
+  state.Pc++
+})
+```
