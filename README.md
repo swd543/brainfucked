@@ -1,4 +1,4 @@
-# brainfucked ![Go](https://github.com/swd543/brainfucked/actions/workflows/workflows/go.yml/badge.svg)
+# brainfucked ![Build](https://github.com/swd543/brainfucked/actions/workflows/go.yml/badge.svg)
 A stack based, streaming brainfuck interpreter written in golang ;)
 
 # Running
