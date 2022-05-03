@@ -27,4 +27,4 @@ jobs:
     - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
       uses: tj-actions/coverage-badge-go@v1.1
       with:
-        filename: coverage.out
+        filename: interpret/coverage.out
