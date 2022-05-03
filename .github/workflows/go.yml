@@ -22,7 +22,7 @@ jobs:
       run: cd brainfuck && go build -v ./...
 
     - name: Test
-      run: cd ../interpret && go test -v -cover -covermode=count -coverprofile=coverage.out && go tool cover -func=coverage.out -o=coverage.out
+      run: cd interpret && go test -v -cover -covermode=count -coverprofile=coverage.out && go tool cover -func=coverage.out -o=coverage.out
     
     - name: Go Coverage Badge  # Pass the `coverage.out` output to this action
       uses: tj-actions/coverage-badge-go@v1.1
