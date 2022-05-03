@@ -1,4 +1,4 @@
-module github.com/swd543/brainfuck
+module github.com/swd543/brainfucked/brainfuck
 
 go 1.18
 
