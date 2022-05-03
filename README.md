@@ -1,6 +1,6 @@
 # brainfucked 
 
-![Build](https://github.com/swd543/brainfucked/actions/workflows/go.yml/badge.svg)
+![Build](https://github.com/swd543/brainfucked/actions/workflows/go-coverage.yml/badge.svg)
 ![Coverage](https://img.shields.io/badge/Coverage-87.7%25-brightgreen)
 
 
