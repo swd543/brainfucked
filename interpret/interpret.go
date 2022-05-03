@@ -31,7 +31,7 @@ type Stack[T any] interface {
 }
 
 /*
-Push data into the stack
+Push Data into the stack
 */
 func (s *StackImpl[T]) Push(data T) {
 	s.data = append(s.data, data)
@@ -39,7 +39,7 @@ func (s *StackImpl[T]) Push(data T) {
 }
 
 /*
-Pop data from the top of the stack, removing the element
+Pop Data from the top of the stack, removing the element
 */
 func (s *StackImpl[T]) Pop() T {
 	s.iter--
@@ -75,26 +75,26 @@ State is a generic struct that contains the entire state of the interpreter.
 Define custom commands in the mapping variable.
 */
 type State[C CellType] struct {
-	// reader is the interface for the program stream
+	// reader is the interface for the Program stream
 	reader io.Reader
-	// writer is the interface for the program output
+	// writer is the interface for the Program output
 	writer io.Writer
-	// inputReader is the interface for reading the inputs to the program
+	// inputReader is the interface for reading the inputs to the Program
 	inputReader io.Reader
-	// program is a holder for the lazy-loaded program
-	program []byte
-	// data is an array of cells of type C
-	data []C
-	// pc is program counter, or the pointer to the instruction
-	pc uint
-	// dp is data pointer, or the pointer to the data cell
-	dp uint
+	// Program is a holder for the lazy-loaded Program
+	Program []byte
+	// Data is an array of cells of type C
+	Data []C
+	// Pc is Program counter, or the pointer to the instruction
+	Pc uint
+	// Dp is Data pointer, or the pointer to the Data cell
+	Dp uint
 	// mapping is the mapping between characters to functions,
 	// which mutate the State
 	mapping map[byte]func(state *State[C])
 	// loopStack is the stack for keeping track of loops
 	loopStack Stack[uint]
-	// jumpMap is an optimization over the streamed program, providing
+	// jumpMap is an optimization over the streamed Program, providing
 	// fast lookup for jump instructions
 	jumpMap map[uint]uint
 }
@@ -107,36 +107,36 @@ func NewState[C CellType](reader io.Reader, writer io.Writer, inputReader io.Rea
 		reader:      reader,
 		writer:      writer,
 		inputReader: inputReader,
-		program:     make([]byte, 0, 30000),
-		data:        make([]C, 300, 30000),
-		dp:          0,
-		pc:          0,
+		Program:     make([]byte, 0, 30000),
+		Data:        make([]C, 300, 30000),
+		Dp:          0,
+		Pc:          0,
 		loopStack:   NewStackImpl[uint](),
 		jumpMap:     map[uint]uint{},
 		mapping: map[byte]func(state *State[C]){
 			'>': func(state *State[C]) {
-				state.dp++
-				state.pc++
+				state.Dp++
+				state.Pc++
 			},
 			'<': func(state *State[C]) {
-				state.dp--
-				state.pc++
+				state.Dp--
+				state.Pc++
 			},
 			'+': func(state *State[C]) {
-				state.data[state.dp]++
-				state.pc++
+				state.Data[state.Dp]++
+				state.Pc++
 			},
 			'-': func(state *State[C]) {
-				state.data[state.dp]--
-				state.pc++
+				state.Data[state.Dp]--
+				state.Pc++
 			},
 			'.': func(state *State[C]) {
-				_, err := writer.Write([]byte(string(rune(state.data[state.dp]))))
+				_, err := writer.Write([]byte(string(rune(state.Data[state.Dp]))))
 				if err != nil {
 					fmt.Errorf("%e while writing output", err)
 				}
-				//fmt.Print(string(rune(state.data[state.dp])))
-				state.pc++
+				//fmt.Print(string(rune(state.Data[state.Dp])))
+				state.Pc++
 			},
 			',': func(state *State[C]) {
 				read := make([]byte, 1)
@@ -144,35 +144,35 @@ func NewState[C CellType](reader io.Reader, writer io.Writer, inputReader io.Rea
 				if err != nil {
 					fmt.Errorf("%e while reading input", err)
 				}
-				state.data[state.dp] = C(read[0])
+				state.Data[state.Dp] = C(read[0])
 			},
 			'[': func(state *State[C]) {
 				// push current location in stack
-				state.loopStack.Push(state.pc)
+				state.loopStack.Push(state.Pc)
 				// jump forward
-				if state.data[state.dp] == 0 {
+				if state.Data[state.Dp] == 0 {
 					// if exists in jumpMap, jump there
 					if v, ok := state.jumpMap[state.loopStack.Peek()]; ok {
-						state.pc = v
+						state.Pc = v
 					} else {
 						// find the next closing brace and jump to it
 						state.findNextClosingBrace()
-						state.pc = state.jumpMap[state.loopStack.Peek()]
+						state.Pc = state.jumpMap[state.loopStack.Peek()]
 					}
 				} else {
 					// continue into loop
-					state.pc++
+					state.Pc++
 				}
 			},
 			']': func(state *State[C]) {
 				v := state.loopStack.Pop()
-				state.jumpMap[v] = state.pc
+				state.jumpMap[v] = state.Pc
 				// continue inside scope
-				if state.data[state.dp] == 0 {
-					state.pc++
+				if state.Data[state.Dp] == 0 {
+					state.Pc++
 				} else {
 					// jump to corresponding open brace
-					state.pc = v
+					state.Pc = v
 				}
 			},
 		}}
@@ -207,9 +207,9 @@ close brace has not been encountered yet, and a jump forward is requested.
 func (self *State[T]) findNextClosingBrace() {
 	buff := make([]byte, 1)
 	var tempStack Stack[uint] = NewStackImpl[uint]()
-	tempStack.Push(self.pc)
+	tempStack.Push(self.Pc)
 	// loop until requested matching closing brace found
-	for i := uint(len(self.program)); ; {
+	for i := uint(len(self.Program)); ; {
 		_, err := self.reader.Read(buff)
 		if err != nil {
 			// if error encountered, panic
@@ -217,8 +217,8 @@ func (self *State[T]) findNextClosingBrace() {
 		}
 		op := buff[0]
 		if _, ok := self.mapping[op]; ok {
-			// if valid command, append to program
-			self.program = append(self.program, op)
+			// if valid command, append to Program
+			self.Program = append(self.Program, op)
 			if op == '[' {
 				tempStack.Push(i)
 			} else if op == ']' {
@@ -235,13 +235,13 @@ func (self *State[T]) findNextClosingBrace() {
 
 /*
 GetNextSymbol streams the provided reader interface, either returning the next
-instruction or back to the loop start if the program requests so.
+instruction or back to the loop start if the Program requests so.
 */
 func (self *State[T]) GetNextSymbol() (byte, error) {
 	var err error
-	if self.pc >= uint(len(self.program)) {
+	if self.Pc >= uint(len(self.Program)) {
 		buff := make([]byte, 1)
-		for i := uint(len(self.program)); i <= self.pc; {
+		for i := uint(len(self.Program)); i <= self.Pc; {
 			_, err = self.reader.Read(buff)
 			if err == nil {
 			} else {
@@ -249,10 +249,10 @@ func (self *State[T]) GetNextSymbol() (byte, error) {
 			}
 			instruction := buff[0]
 			if self.mapping[instruction] != nil {
-				self.program = append(self.program, instruction)
+				self.Program = append(self.Program, instruction)
 				i++
 			}
 		}
 	}
-	return self.program[self.pc], err
+	return self.Program[self.Pc], err
 }
