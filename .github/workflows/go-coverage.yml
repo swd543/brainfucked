@@ -27,13 +27,13 @@ jobs:
 
       - name: Test
         run: |
-          go test -v -cover -covermode=count -coverprofile=coverage.out && go tool cover -func=coverage.out -o=coverage.out
+          cd interpret && go test -v -cover -covermode=count -coverprofile=coverage.out && go tool cover -func=coverage.out -o=coverage.out
 
       # Pass the `coverage.cov` output to this action
       - name: Go Coverage Badge
         uses: tj-actions/coverage-badge-go@v1.1
         with:
-          filename: coverage.cov
+          filename: interpret/coverage.out
 
       # Verify percentile of code coverage changed
       - name: Verify Changed files
